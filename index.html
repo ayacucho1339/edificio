@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nuestro Edificio · Seguimiento de temas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2F4F7;
+    --surface:#FFFFFF;
+    --surface-2:#F8FAFC;
+    --ink:#13161C;
+    --ink-soft:#5A6270;
+    --ink-faint:#8B93A1;
+    --line:#E4E8EE;
+    --line-strong:#D2D8E0;
+    --accent:#2D4EF5;
+    --accent-ink:#1B2E8A;
+    --accent-soft:#EAEEFF;
+    --alta:#E0483D;
+    --alta-soft:#FCEBE9;
+    --media:#D98613;
+    --media-soft:#FBF1DF;
+    --baja:#4F8C7B;
+    --baja-soft:#E6F1ED;
+    --ok:#1F9D63;
+    --ok-soft:#E3F3EB;
+    --neg:#9A4B2E;
+    --neg-soft:#F4E9E1;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 8px 24px rgba(16,24,40,.06);
+    --shadow-lg:0 24px 60px rgba(16,24,40,.18);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Inter",system-ui,-apple-system,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  .mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+  .display{font-family:"Space Grotesk","Inter",sans-serif}
+  button{font-family:inherit;cursor:pointer}
+  input{font-family:inherit}
+
+  /* ---------- LOGIN ---------- */
+  #login{
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    padding:24px;
+    background:
+      radial-gradient(120% 120% at 80% 0%, #1c2440 0%, #11151f 55%, #0c0f17 100%);
+  }
+  #login::before{
+    content:"";position:absolute;inset:0;opacity:.10;pointer-events:none;
+    background-image:linear-gradient(#9fb0ff 1px, transparent 1px), linear-gradient(90deg, #9fb0ff 1px, transparent 1px);
+    background-size:34px 34px;
+    mask-image:radial-gradient(100% 80% at 50% 30%, #000 30%, transparent 75%);
+  }
+  .login-card{
+    position:relative;width:100%;max-width:380px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:20px;padding:34px 30px 30px;
+    backdrop-filter:blur(8px);
+    box-shadow:0 30px 80px rgba(0,0,0,.45);
+  }
+  .login-badge{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:#aeb9e6;font-weight:600;
+    border:1px solid rgba(255,255,255,.14);border-radius:999px;
+    padding:6px 12px;margin-bottom:22px;
+  }
+  .login-badge .dot{width:7px;height:7px;border-radius:50%;background:#6f86ff;box-shadow:0 0 12px #6f86ff}
+  .login-card h1{
+    font-family:"Space Grotesk",sans-serif;color:#fff;font-weight:600;
+    font-size:25px;line-height:1.15;margin:0 0 6px;letter-spacing:-.01em;
+  }
+  .login-card p{color:#9aa3bd;font-size:13.5px;margin:0 0 26px}
+  .field{position:relative}
+  .field label{
+    display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    color:#8590ad;font-weight:600;margin-bottom:8px;
+  }
+  .field input{
+    width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);
+    color:#fff;font-size:16px;padding:13px 14px;border-radius:11px;outline:none;
+    transition:border-color .15s, background .15s;letter-spacing:.04em;
+  }
+  .field input::placeholder{color:#647095}
+  .field input:focus{border-color:#6f86ff;background:rgba(255,255,255,.09)}
+  .login-btn{
+    width:100%;margin-top:18px;border:none;border-radius:11px;
+    background:linear-gradient(180deg,#3a5bff,#2d4ef5);color:#fff;
+    font-weight:600;font-size:15px;padding:13px;letter-spacing:.01em;
+    transition:transform .08s, filter .15s;
+  }
+  .login-btn:hover{filter:brightness(1.07)}
+  .login-btn:active{transform:translateY(1px)}
+  .login-err{color:#ff9a8f;font-size:13px;margin-top:14px;min-height:18px;text-align:center}
+  .login-hint{color:#5e688a;font-size:11.5px;text-align:center;margin-top:18px}
+
+  /* ---------- APP SHELL ---------- */
+  #app{display:none;min-height:100vh}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+  .topbar{
+    position:sticky;top:0;z-index:20;background:rgba(242,244,247,.82);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{display:flex;align-items:center;justify-content:space-between;height:62px}
+  .brand{display:flex;align-items:center;gap:11px;min-width:0}
+  .brand .mark{
+    width:34px;height:34px;border-radius:9px;flex:none;
+    background:var(--ink);display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:"Space Grotesk";font-weight:700;font-size:15px;letter-spacing:-.02em;
+  }
+  .brand .name{font-family:"Space Grotesk";font-weight:600;font-size:15.5px;letter-spacing:-.01em;line-height:1.1}
+  .brand .sub{font-size:11.5px;color:var(--ink-faint)}
+  .logout{
+    border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-soft);
+    font-size:13px;font-weight:500;padding:8px 13px;border-radius:9px;transition:background .12s,color .12s;
+  }
+  .logout:hover{background:#fff;color:var(--ink)}
+
+  /* ---------- HERO / SAFETY SIGN ---------- */
+  .hero{padding:26px 0 6px}
+  .hero-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:16px}
+  .sign{
+    position:relative;overflow:hidden;border-radius:var(--radius);
+    background:#15181f;color:#fff;padding:22px 24px;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;justify-content:space-between;min-height:148px;
+    cursor:pointer;transition:transform .12s, box-shadow .12s;
+  }
+  .sign:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(16,24,40,.18)}
+  .sign .stripe{position:absolute;top:0;left:0;right:0;height:6px;
+    background:repeating-linear-gradient(45deg,#f5c518 0 14px,#1b1e26 14px 28px);opacity:.9}
+  .sign-top{display:flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#aab3c9;font-weight:600;margin-top:6px}
+  .sign-num{font-family:"Space Grotesk";font-weight:700;font-size:62px;line-height:.95;letter-spacing:-.03em;margin:6px 0 2px}
+  .sign-label{font-size:13.5px;color:#c3cad8}
+  .sign-foot{font-size:12px;color:#8b93a6;display:flex;align-items:center;gap:8px}
+  .pulse{width:8px;height:8px;border-radius:50%}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .pulse.on{animation:pulse 1.6s infinite}
+
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .stat{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 16px 14px;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .stat .k{font-family:"Space Grotesk";font-weight:700;font-size:30px;letter-spacing:-.02em;line-height:1}
+  .stat .t{font-size:12.5px;color:var(--ink-soft);margin-top:8px}
+  .stat .bar{height:4px;border-radius:99px;background:var(--line);margin-top:12px;overflow:hidden}
+  .stat .bar i{display:block;height:100%;border-radius:99px}
+
+  /* ---------- TOOLBAR / FILTERS ---------- */
+  .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:30px 0 14px;flex-wrap:wrap}
+  .section-head h2{font-family:"Space Grotesk";font-weight:600;font-size:19px;letter-spacing:-.01em;margin:0}
+  .section-head .hint{font-size:12.5px;color:var(--ink-faint)}
+  .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+  .search{position:relative;flex:1;min-width:180px}
+  .search input{
+    width:100%;border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;
+    padding:9px 12px 9px 34px;font-size:14px;outline:none;color:var(--ink);transition:border-color .15s;
+  }
+  .search input:focus{border-color:var(--accent)}
+  .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--ink-faint)}
+  .seg{display:inline-flex;background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;padding:3px}
+  .seg button{border:none;background:none;color:var(--ink-soft);font-size:13px;font-weight:500;padding:6px 13px;border-radius:7px;transition:all .12s}
+  .seg button.active{background:var(--ink);color:#fff}
+  .selectwrap{position:relative}
+  select{
+    appearance:none;border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;
+    padding:8px 30px 8px 12px;font-size:13.5px;color:var(--ink);outline:none;cursor:pointer;
+  }
+  select:focus{border-color:var(--accent)}
+  .selectwrap::after{content:"▾";position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--ink-faint);font-size:11px;pointer-events:none}
+
+  /* ---------- ISSUE LIST ---------- */
+  .group-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin:22px 2px 10px;display:flex;align-items:center;gap:8px}
+  .group-label::after{content:"";flex:1;height:1px;background:var(--line)}
+  .list{display:flex;flex-direction:column;gap:10px}
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:15px 16px;display:flex;align-items:center;gap:15px;cursor:pointer;
+    transition:border-color .14s, box-shadow .14s, transform .14s;box-shadow:var(--shadow);
+  }
+  .card:hover{border-color:var(--line-strong);box-shadow:0 6px 20px rgba(16,24,40,.09);transform:translateY(-1px)}
+  .card .prio{width:4px;align-self:stretch;border-radius:99px;flex:none}
+  .card .body{flex:1;min-width:0}
+  .card .title-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .card .title{font-family:"Space Grotesk";font-weight:600;font-size:15.5px;letter-spacing:-.01em}
+  .card .meta{font-size:12.5px;color:var(--ink-soft);margin-top:5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .card .chev{color:var(--ink-faint);flex:none}
+
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .pill .d{width:6px;height:6px;border-radius:50%}
+  .prio-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;letter-spacing:.02em;text-transform:uppercase}
+  .chip{font-size:11.5px;font-weight:500;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);padding:2px 9px;border-radius:7px}
+  .dotsep{color:var(--line-strong)}
+
+  /* ---------- DETAIL OVERLAY ---------- */
+  #scrim{position:fixed;inset:0;background:rgba(15,20,30,.42);backdrop-filter:blur(2px);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+  #scrim.open{opacity:1;pointer-events:auto}
+  #detail{
+    position:fixed;top:0;right:0;bottom:0;z-index:50;width:min(820px,100%); /* Cambiado a 820px */
+    background:var(--surface);box-shadow:var(--shadow-lg);transform:translateX(102%);
+    transition:transform .26s cubic-bezier(.32,.72,.3,1);display:flex;flex-direction:column;
+  }
+  #detail.open{transform:none}
+  .d-top{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2}
+  .d-back{display:inline-flex;align-items:center;gap:7px;border:none;background:none;color:var(--ink-soft);font-size:13.5px;font-weight:500;padding:6px 8px;border-radius:8px}
+  .d-back:hover{background:var(--surface-2);color:var(--ink)}
+  .d-scroll{overflow-y:auto;padding:24px 26px 60px}
+  .d-eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600}
+  .d-title{font-family:"Space Grotesk";font-weight:600;font-size:26px;line-height:1.15;letter-spacing:-.015em;margin:8px 0 18px}
+  .d-props{display:grid;grid-template-columns:160px 1fr;gap:11px 16px;align-items:start;font-size:14px;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)} /* Ajustada la columna base de props */
+  .d-props .pk{color:var(--ink-faint);font-size:12.5px;padding-top:2px}
+  .d-props .pv{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .d-section{margin-top:26px}
+  .d-section h3{font-family:"Space Grotesk";font-size:13.5px;font-weight:600;letter-spacing:.01em;margin:0 0 12px;color:var(--ink)}
+  .d-body{font-size:14.5px;color:#2c333f;line-height:1.62}
+  .callout{background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:14px;color:#2c333f}
+
+  /* cost panel */
+  .cost{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .cost > div{background:var(--surface);padding:15px 16px}
+  .cost .lbl{font-size:11.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .cost .val{font-family:"Space Grotesk";font-weight:700;font-size:23px;letter-spacing:-.01em;margin-top:6px}
+  .cost .val small{font-size:13px;font-weight:500;color:var(--ink-faint);letter-spacing:0}
+
+  /* participants */
+  .who{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+  .who .p{font-size:12.5px;background:var(--accent-soft);color:var(--accent-ink);border:1px solid #d4ddff;padding:3px 10px;border-radius:8px;font-weight:500}
+  .join{border:1px dashed var(--line-strong);background:var(--surface);color:var(--accent-ink);font-weight:600;font-size:13px;padding:7px 14px;border-radius:9px;transition:all .12s}
+  .join:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .join.in{background:var(--ink);color:#fff;border-style:solid;border-color:var(--ink)}
+
+  /* gallery */
+  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+  .gthumb{aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}
+  .gthumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .gadd{aspect-ratio:1;border:1px dashed var(--line-strong);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--ink-faint);font-size:11.5px;font-weight:500;background:var(--surface-2);transition:all .12s}
+  .gadd:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
+  /* incident table */
+  .tbl-wrap{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .tbl-scroll{overflow-x:auto}
+  table.inc{border-collapse:collapse;width:100%;font-size:13px;min-width:520px}
+  table.inc th{
+    text-align:left;background:var(--surface-2);color:var(--ink-faint);font-weight:600;
+    font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:10px 13px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  table.inc td{padding:11px 13px;border-bottom:1px solid var(--line);color:#2c333f;vertical-align:top}
+  table.inc tr:last-child td{border-bottom:none}
+  table.inc tr.active td{background:#fff7ed}
+  table.inc .fch{white-space:nowrap;color:var(--ink-soft)}
+  table.inc .eq{font-weight:600;white-space:nowrap}
+  .tag-sm{display:inline-block;font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:6px}
+
+  .note{font-size:12px;color:var(--ink-faint);margin-top:10px;line-height:1.5}
+  .recur-flag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--accent-ink);background:var(--accent-soft);padding:2px 8px;border-radius:7px}
+
+  .footer{padding:38px 0 30px;text-align:center;color:var(--ink-faint);font-size:12px}
+
+  /* Modificado el Media Query para no romper el panel ancho de 820px */
+  @media (max-width:860px){
+    .hero-grid{grid-template-columns:1fr}
+    .sign{min-height:130px}
+    .d-props{grid-template-columns:1fr;gap:4px}
+    .d-props .pk{padding-top:10px}
+    .d-props .pk:first-child{padding-top:0}
+    .cost{grid-template-columns:1fr}
+    .topbar-inner{height:56px}
+    .brand .sub{display:none}
+    #detail{width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login">
+  <div class="login-card">
+    <span class="login-badge"><span class="dot"></span>Acceso vecinos</span>
+    <h1>Seguimiento del<br>edificio</h1>
+    <p>Ingresá la clave del edificio para ver los temas en curso.</p>
+    <div class="field">
+      <label for="pw">Clave</label>
+      <input id="pw" type="password" inputmode="text" placeholder="••••••••" autocomplete="off" />
+    </div>
+    <button class="login-btn" id="loginBtn">Entrar</button>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-hint">Demo · clave: <b>edificio2026</b></div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <div class="mark">NE</div>
+        <div>
+          <div class="name">Nuestro Edificio</div>
+          <div class="sub">Seguimiento de temas vecinales</div>
+        </div>
+      </div>
+      <button class="logout" id="logoutBtn">Salir</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero-grid" id="hero"></div>
+    </section>
+
+    <div class="section-head">
+      <div>
+        <h2>Temas</h2>
+        <div class="hint" id="listHint"></div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="q" type="text" placeholder="Buscar tema…" autocomplete="off"/>
+      </div>
+      <div class="seg" id="segEstado">
+        <button data-v="abiertos" class="active">Abiertos</button>
+        <button data-v="todos">Todos</button>
+      </div>
+      <div class="selectwrap">
+        <select id="fGestion">
+          <option value="todos">Toda gestión</option>
+          <option value="vecinos">Vecinos</option>
+          <option value="fideicomiso">Fideicomiso</option>
+          <option value="arquitecto">Arquitecto</option>
+          <option value="a determinar">A determinar</option>
+        </select>
+      </div>
+      <div class="selectwrap">
+        <select id="fPrioridad">
+          <option value="todas">Toda prioridad</option>
+          <option value="alta">Alta</option>
+          <option value="media">Media</option>
+          <option value="baja">Baja</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="list" class="list"></div>
+    <div class="footer">Tablero de demostración · datos cargados a mano · sin base de datos</div>
+  </main>
+</div>
+
+<div id="scrim"></div>
+<aside id="detail">
+  <div class="d-top">
+    <button class="d-back" id="closeDetail">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>
+      Volver
+    </button>
+  </div>
+  <div class="d-scroll" id="detailBody"></div>
+</aside>
+
+<script>
+// ==========================================
+// #region 1. GLOBAL CONFIG & CATALOGS
+// ==========================================
+const CLAVE = "edificio2026";
+const UNIDADES_TOTALES = 40; 
+
+const ESTADOS = {
+  "sin iniciar": {label:"Sin iniciar", grupo:"abierto", color:"#8B93A1", soft:"#EEF0F4"},
+  "en curso":    {label:"En curso",    grupo:"abierto", color:"#2D4EF5", soft:"#EAEEFF"},
+  "bloqueado":   {label:"Bloqueado",   grupo:"abierto", color:"#D14343", soft:"#FCECEC"},
+  "a determinar":{label:"A determinar",grupo:"abierto", color:"#C98A1A", soft:"#FBF1DF"},
+  "resuelto":    {label:"Resuelto",    grupo:"cerrado", color:"#1F9D63", soft:"#E3F3EB"},
+  "no resuelto": {label:"No resuelto", grupo:"cerrado", color:"#9A4B2E", soft:"#F4E9E1"},
+};
+const PRIORIDADES = {
+  alta:  {label:"Alta",  color:"var(--alta)",  soft:"var(--alta-soft)",  rank:0},
+  media: {label:"Media", color:"var(--media)", soft:"var(--media-soft)", rank:1},
+  baja:  {label:"Baja",  color:"var(--baja)",  soft:"var(--baja-soft)",  rank:2},
+};
+const GESTION = {
+  "vecinos":{label:"Vecinos"}, 
+  "fideicomiso":{label:"Fideicomiso"},
+  "arquitecto":{label:"Arquitecto"}, 
+  "a determinar":{label:"A determinar"},
+};
+// #endregion
+
+
+// ==========================================
+// #region 2. DATASET: ASCENSORES
+// ==========================================
+const incidentesAscensores = [
+  {fecha:"19/12/25", equipo:"Ascensor 2",        detalle:"Ascensor del medio trabado en piso 8.", reportadoPor:"Daniela (3E)", estado:"cerrado"},
+  {fecha:"23/12/25", equipo:"Todos",             detalle:"Entró agua directamente en la cabina...", reportadoPor:"Valen (6C)", estado:"cerrado"},
+  {fecha:"05/01/26", equipo:"Ascensor 3",        detalle:"Todos los ascensores dejaron de funcionar.", reportadoPor:"Adriana (1A)", estado:"cerrado"},
+  {fecha:"05/01/26", equipo:"Ascensor 1",        detalle:"El Ascensor 1 abre las puertas más lento...", reportadoPor:"Marina (6A)", estado:"cerrado"},
+  {fecha:"06/01/26", equipo:"Ascensor 3",        detalle:"El Ascensor 3 quedó con las puertas abiertas...", reportadoPor:"Marina (6A)", estado:"cerrado"},
+  {fecha:"02/02/26", equipo:"Ascensor 2",        detalle:"Tras el arreglo, los vecinos detectan fallas.", reportadoPor:"Maki (4A)", estado:"cerrado"},
+  {fecha:"10/02/26", equipo:"Ascensor 2",        detalle:"Mirta quedó encerrada en el subsuelo.", reportadoPor:"Mirta (7C)", estado:"cerrado"},
+  {fecha:"07/03/26", equipo:"Ascensor 2",        detalle:"El ascensor quedó fuera de servicio en PB.", reportadoPor:"Mirta (7C)", estado:"cerrado"},
+  {fecha:"10/03/26", equipo:"Ascensor 2",        detalle:"El padre de Marina quedó encerrado.", reportadoPor:"Marina (6A)", estado:"cerrado"},
+  {fecha:"16/03/26", equipo:"Ascensor 1",        detalle:"Nueva falla en el primer equipo.", reportadoPor:"Cami (7A)", estado:"cerrado"},
+  {fecha:"22/03/26", equipo:"Ascensor 1",        detalle:"El Ascensor 1 se abre y cierra solo.", reportadoPor:"Cami (7A)", estado:"cerrado"},
+  {fecha:"09/04/26", equipo:"Todos",             detalle:"Avanzan con kits de reparación en 6 cuotas...", reportadoPor:"Cami / Adriana", estado:"cerrado"},
+  {fecha:"12/04/26", equipo:"Ascensores 2 y 3",  detalle:"Natalia se queda encerrada, usa palanca...", reportadoPor:"Natalia (5C)", estado:"cerrado"},
+  {fecha:"25/04/26", equipo:"Ascensores 2 y 3",  detalle:"El técnico dijo que funcionaban, sábado rotos.", reportadoPor:"Álvaro (3E)", estado:"cerrado"},
+  {fecha:"22/05/26", equipo:"Ascensor 1",        detalle:"Se quedó encerrado Mario Caballero.", reportadoPor:"Álvaro  / Marina", estado:"cerrado"},
+  {fecha:"26/05/26", equipo:"Ascensor 2",        detalle:"Sube y baja sin contemplar el piso elegido.", reportadoPor:"Adriana (1A)", estado:"cerrado"},
+  {fecha:"09/06/26", equipo:"Ascensor 2",        detalle:"Dejó de funcionar.", reportadoPor:"Álvaro (3E)", estado:"en curso"},
+];
+// #endregion
+
+
+// ==========================================
+// #region 3. DATASET: OTROS TEMAS
+// ==========================================
+const temas = [
+  {
+    id:"ascensores", tipo:"ascensores",
+    titulo:"Ascensores",
+    resumen:"Historial y seguimiento de las fallas recurrentes de los ascensores.",
+    estado:"en curso", prioridad:"alta", gestionadoPor:["vecinos", "arquitecto"],
+    fechaComienzo: "2025-12-19",
+    incidentes: incidentesAscensores,
+    detalle:"Tema \"paraguas\" que agrupa todos los incidentes con los tres ascensores.",
+  },
+  {
+    id:"exp-muni-1",
+    titulo:"Expediente municipal #1 — Baja de impuesto",
+    resumen:"Pedido de baja del impuesto municipal por montos demasiado altos.",
+    estado:"en curso", prioridad:"alta", gestionadoPor:["vecinos"],
+    fechaComienzo: "2026-05-04",
+    referente:"Mirta, Adriana (2A), Mario (8A)",
+    detalle:"Se gestiona ante la municipalidad la baja del impuesto...",
+    callout:"Estado: aguardando respuesta de la municipalidad.",
+  },
+  {
+    id:"exp-muni-2",
+    titulo:"Expediente municipal #2 — Corrección de registros",
+    resumen:"Solicitud para corregir registros municipales del edificio.",
+    estado:"en curso", prioridad:"alta", gestionadoPor:["fideicomiso"],
+    fechaComienzo: "2026-05-04",
+    detalle:"Se solicita corregir registros municipales. Lo lleva adelante el fideicomiso.",
+    callout:"No conocemos los detalles, ya que la gestión está a cargo del fideicomiso.",
+  },
+  {
+    id:"planos",
+    titulo:"Arreglo de planos",
+    resumen:"Los planos presentaban errores y se están rehaciendo.",
+    estado:"en curso", prioridad:"alta", gestionadoPor:["fideicomiso"],
+    fechaComienzo: "2026-05-04",
+    detalle:"Los planos del edificio presentaban errores. Se están volviendo a hacer.",
+  },
+  {
+    id:"gotera-subsuelo",
+    titulo:"Gotera en el subsuelo",
+    resumen:"Filtración detectada en el subsuelo, sin responsable asignado.",
+    estado:"sin iniciar", prioridad:"media", gestionadoPor:["a determinar"],
+    fechaComienzo: "2026-06-11",
+    detalle:"Hay una gotera en el subsuelo. Falta definir quién se encarga.",
+  },
+  {
+    id:"agua-techo",
+    titulo:"Acumulación de agua en el techo",
+    resumen:"Se acumula agua en el techo; pendiente de definir responsable.",
+    estado:"sin iniciar", prioridad:"media", gestionadoPor:["a determinar"],
+    fechaComienzo: "2026-06-11",
+    detalle:"Se detecta acumulación de agua en el techo. Falta definir pasos a seguir.",
+  },
+  {
+    id:"bicicleteros",
+    titulo:"Bicicleteros",
+    resumen:"Compra realizada y colocada. Gasto compartido entre quienes se sumaron. Resuelto por Álvaro (3E)",
+    estado:"resuelto", prioridad:"baja", gestionadoPor:["vecinos"],
+    fechaComienzo: "2026-06-08",
+    detalle:"Se compraron e instalaron bicicleteros para el edificio.",
+    costo:96000,
+  },
+  {
+    id:"cloro",
+    titulo:"Compra de cloro para la pileta - Junio 2026",
+    resumen:"Tarea recurrente mensual para el mantenimiento de la pileta. Resuelto por Marina (6A)",
+    estado:"resuelto", prioridad:"baja", gestionadoPor:["vecinos"],
+    fechaComienzo: "Tarea recurrente",
+    fechaComienzo: "2026-06-01",
+    detalle:"Compra periódica de cloro para el mantenimiento de la pileta",
+  },
+];
+// #endregion
+
+
+// ==========================================
+// #region 4. APPLICATION STATE
+// ==========================================
+const state = {
+  estado:"abiertos", 
+  gestion:"todos", 
+  prioridad:"todas", 
+  q:"",
+  openId:null,
+  joined:{},     
+  fotos:{},      
+};
+// #endregion
+
+
+// ==========================================
+// #region 5. CORE FUNCTIONS & RENDERING
+// ==========================================
+const $ = (s,el=document)=>el.querySelector(s);
+const esc = (s)=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ars = (n)=>"$"+Number(n).toLocaleString("es-AR");
+
+function parseFecha(f){const[d,m,y]=f.split("/").map(Number);return new Date(2000+y,m-1,d);}
+
+function diasSinIncidentes(inc){
+  if(inc.some(i=>i.estado!=="cerrado")) return 0; 
+  const max=Math.max(...inc.map(i=>parseFecha(i.fecha).getTime()));
+  const hoy=new Date();hoy.setHours(0,0,0,0);
+  return Math.max(0,Math.round((hoy.getTime()-max)/86400000));
+}
+
+function esAbierto(t){return ESTADOS[t.estado].grupo==="abierto";}
+
+function pillEstado(estado){
+  const e=ESTADOS[estado];
+  return `<span class="pill" style="background:${e.soft};color:${e.color}"><span class="d" style="background:${e.color}"></span>${e.label}</span>`;
+}
+
+function prioTag(p){
+  const pr=PRIORIDADES[p];
+  return `<span class="prio-tag" style="color:${pr.color}">● ${pr.label}</span>`;
+}
+
+function renderHero(){
+  const asc = temas.find(t=>t.tipo==="ascensores");
+  const diasSinFallas = diasSinIncidentes(asc.incidentes);
+  const activo = asc.incidentes.some(i=>i.estado==="en curso");
+  
+  let diasActivo = 0;
+  if (activo) {
+    const enCurso = asc.incidentes.filter(i => i.estado === "en curso");
+    const tiempos = enCurso.map(i => parseFecha(i.fecha).getTime());
+    const masViejo = Math.min(...tiempos);
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    diasActivo = Math.max(0, Math.round((hoy.getTime() - masViejo) / 86400000));
+  }
+
+  let promedioIncidentes = 0;
+  if (asc.incidentes.length > 0) {
+    const tiemposIncidentes = asc.incidentes.map(i => parseFecha(i.fecha).getTime());
+    const maxFecha = Math.max(...tiemposIncidentes);
+    const minFecha = Math.min(...tiemposIncidentes);
+    const totalIncidentes = asc.incidentes.length;
+    promedioIncidentes = Math.floor(((maxFecha - minFecha) / 86400000) / totalIncidentes);
+  }
+
+  const colorSinFallas = diasSinFallas < 7 ? "#ff6b5e" : diasSinFallas < 30 ? "#f5c518" : "#41d18b";
+  const colorActivo = diasActivo > 0 ? "#ff6b5e" : "#8b93a6";
+
+  const abiertos = temas.filter(esAbierto);
+  const altas = abiertos.filter(t=>t.prioridad==="alta").length;
+  const resueltos = temas.filter(t=>t.estado==="resuelto").length;
+  const total = temas.length;
+  const pctResuelto = Math.round(resueltos/total*100);
+
+  $("#hero").innerHTML = `
+    <div class="sign" data-open="ascensores">
+      <div class="stripe"></div>
+      <div class="sign-top">
+        <span class="pulse ${activo?'on':''}" style="background:${activo ? '#ff6b5e' : colorSinFallas}"></span>
+        Ascensores · seguridad y estado
+      </div>
+      
+      <!-- Corregido el contenedor para ordenar los números de las métricas en una sola línea fija -->
+      <div style="display: flex; gap: 20px; margin: 18px 0 6px; flex-wrap: nowrap; justify-content: space-between; width: 100%;">
+        <div style="flex: 1; min-width: 0;">
+          <div class="sign-num" style="color:${colorSinFallas}">${diasSinFallas}</div>
+          <div class="sign-label" style="font-size:12px; line-height:1.2;">${diasSinFallas===1?'día':'días'} sin incidentes nuevos</div>
+        </div>
+        <div style="flex: 1; min-width: 0; border-left: 1px solid rgba(255,255,255,0.15); padding-left: 18px;">
+          <div class="sign-num" style="color:${colorActivo}">${diasActivo}</div>
+          <div class="sign-label" style="font-size:12px; line-height:1.2;">${diasActivo===1?'día':'días'} con fallas en curso</div>
+        </div>
+        <div style="flex: 1; min-width: 0; border-left: 1px solid rgba(255,255,255,0.15); padding-left: 18px;">
+          <div class="sign-num" style="color:${colorSinFallas}">${promedioIncidentes}</div>
+          <div class="sign-label" style="font-size:12px; line-height:1.2;">Un incidente cada ${promedioIncidentes} días (promedio)</div>
+        </div>
+      </div>
+
+      <div class="sign-foot" style="margin-top: 10px;">
+        ${asc.incidentes.length} incidentes registrados desde el 2025-12-19 ${activo?' ·<strong><span style="color:#ffb3aa">Falla activa detectada</span></strong>':''}
+      </div>
+    </div>
+    
+    <div class="stats">
+      <div class="stat">
+        <div><div class="k">${abiertos.length}</div><div class="t">Temas abiertos</div></div>
+        <div class="bar"><i style="width:100%;background:var(--accent)"></i></div>
+      </div>
+      <div class="stat">
+        <div><div class="k" style="color:var(--alta)">${altas}</div><div class="t">Prioridad alta abierta</div></div>
+        <div class="bar"><i style="width:${total?Math.round(altas/total*100):0}%;background:var(--alta)"></i></div>
+      </div>
+      <div class="stat">
+        <div><div class="k" style="color:var(--ok)">${resueltos}</div><div class="t">Resueltos</div></div>
+        <div class="bar"><i style="width:${pctResuelto}%;background:var(--ok)"></i></div>
+      </div>
+      <div class="stat">
+        <div><div class="k">${total}</div><div class="t">Temas en total</div></div>
+        <div class="bar"><i style="width:100%;background:var(--ink-soft)"></i></div>
+      </div>
+    </div>`;
+}
+
+function temasFiltrados(){
+  let arr = temas.slice();
+  if(state.estado==="abiertos") arr = arr.filter(esAbierto);
+  if(state.gestion!=="todos") arr = arr.filter(t=>t.gestionadoPor.includes(state.gestion));
+  if(state.prioridad!=="todas") arr = arr.filter(t=>t.prioridad===state.prioridad);
+  if(state.q.trim()){
+    const q=state.q.toLowerCase();
+    arr = arr.filter(t=>(t.titulo+" "+(t.resumen||"")+" "+(t.detalle||"")).toLowerCase().includes(q));
+  }
+  arr.sort((a,b)=>{
+    const ga=esAbierto(a)?0:1, gb=esAbierto(b)?0:1;
+    if(ga!==gb) return ga-gb;
+    return PRIORIDADES[a.prioridad].rank - PRIORIDADES[b.prioridad].rank;
+  });
+  return arr;
+}
+
+function cardHTML(t){
+  const gest = t.gestionadoPor.map(g=>`<span class="chip">${GESTION[g].label}</span>`).join("");
+  let extra = "";
+  if(t.tipo==="ascensores"){const d=diasSinIncidentes(t.incidentes);extra=`<span class="dotsep">·</span><span>${t.incidentes.length} incidentes · ${d} ${d===1?'día':'días'} sin fallas</span>`;}
+  else if(t.costo && (t.participantes||[]).length){extra=`<span class="dotsep">·</span><span>${ars(t.costo)}</span>`;}
+  else if(t.recurrente){extra=`<span class="dotsep">·</span><span class="recur-flag">↻ ${t.recurrente}</span>`;}
+  return `
+    <div class="card" data-open="${t.id}">
+      <span class="prio" style="background:${PRIORIDADES[t.prioridad].color}"></span>
+      <div class="body">
+        <div class="title-row">
+          <span class="title">${esc(t.titulo)}</span>
+          ${pillEstado(t.estado)}
+        </div>
+        <div class="meta">
+          ${prioTag(t.prioridad)}<span class="dotsep">·</span>${gest}${extra}
+        </div>
+      </div>
+      <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+    </div>`;
+}
+
+function renderList(){
+  const arr = temasFiltrados();
+  const cont = $("#list");
+  if(!arr.length){cont.innerHTML=`<div class="card" style="cursor:default;justify-content:center;color:var(--ink-faint)">No hay temas que coincidan con el filtro.</div>`;
+    $("#listHint").textContent="";return;}
+
+  if(state.estado==="todos"){
+    const abiertos = arr.filter(esAbierto), cerrados = arr.filter(t=>!esAbierto(t));
+    let html="";
+    if(abiertos.length) html+=`<div class="group-label">Abiertos · ${abiertos.length}</div><div class="list">${abiertos.map(cardHTML).join("")}</div>`;
+    if(cerrados.length) html+=`<div class="group-label">Cerrados · ${cerrados.length}</div><div class="list">${cerrados.map(cardHTML).join("")}</div>`;
+    cont.innerHTML=html;
+  } else {
+    cont.innerHTML = arr.map(cardHTML).join("");
+  }
+  $("#listHint").textContent = state.estado==="abiertos"
+    ? `${arr.length} ${arr.length===1?'tema abierto':'temas abiertos'}, ordenados por prioridad`
+    : `${arr.length} temas en total`;
+}
+// #endregion
+
+
+// ==========================================
+// #region 6. DETAIL OVERLAY GENERATION
+// ==========================================
+function detailHTML(t){
+  const gest = t.gestionadoPor.map(g=>`<span class="chip">${GESTION[g].label}</span>`).join("");
+  const props = [];
+  props.push([`Estado`, pillEstado(t.estado)]);
+  props.push([`Prioridad`, prioTag(t.prioridad)]);
+  props.push([`Gestionado por`, gest]);
+  
+  if(t.fechaComienzo) {
+    props.push([`Fecha de Comienzo`, `<span class="mono">${esc(t.fechaComienzo)}</span>`]);
+  }
+  if(t.referente) props.push([`Referente`, `<span>${esc(t.referente)}</span>`]);
+  if(t.recurrente) props.push([`Recurrencia`, `<span class="recur-flag">↻ ${esc(t.recurrente)}</span>`]);
+
+  let body = `
+    <div class="d-eyebrow">${t.tipo==="ascensores"?"Tema de seguridad":"Tema del edificio"}</div>
+    <h1 class="d-title">${esc(t.titulo)}</h1>
+    <div class="d-props">${props.map(([k,v])=>`<div class="pk">${k}</div><div class="pv">${v}</div>`).join("")}</div>`;
+
+  if(t.detalle){
+    body += `<div class="d-section"><h3>Descripción</h3><div class="d-body">${esc(t.detalle)}</div></div>`;
+  }
+  if(t.callout){
+    body += `<div class="d-section"><div class="callout">${esc(t.callout)}</div></div>`;
+  }
+
+  if(t.costo && (t.participantes||[]).length){
+    body += `
+      <div class="d-section">
+        <h3>Costo</h3>
+        <div class="cost" style="grid-template-columns:1fr">
+          <div><div class="lbl">Costo total</div><div class="val">${ars(t.costo)}</div></div>
+        </div>
+      </div>`;
+  }
+
+  if(t.tipo==="ascensores"){
+    const rows = t.incidentes.slice().sort((a,b)=>parseFecha(b.fecha)-parseFecha(a.fecha)).map(i=>{
+      const cerr = i.estado==="cerrado";
+      const tag = cerr
+        ? `<span class="tag-sm" style="background:var(--ok-soft);color:var(--ok)">cerrado</span>`
+        : `<span class="tag-sm" style="background:var(--accent-soft);color:var(--accent-ink)">en curso</span>`;
+      return `<tr class="${cerr?'':'active'}">
+        <td class="fch mono">${esc(i.fecha)}</td>
+        <td class="eq">${esc(i.equipo)}</td>
+        <td>${esc(i.detalle)}</td>
+        <td class="mono" style="white-space:nowrap;color:var(--ink-soft)">${esc(i.reportadoPor)}</td>
+        <td>${tag}</td>
+      </tr>`;
+    }).join("");
+    body += `
+      <div class="d-section">
+        <h3>Historial de incidentes</h3>
+        <div class="tbl-wrap"><div class="tbl-scroll"><table class="inc">
+          <thead><tr><th>Fecha</th><th>Falla</th><th>Detalle / impacto</th><th>Reportado por</th><th>Estado</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div></div>
+      </div>`;
+  }
+
+  const fotos = state.fotos[t.id]||[];
+  body += `
+    <div class="d-section">
+      <h3>Fotos y archivos</h3>
+      <div class="gallery">
+        ${fotos.map(src=>`<div class="gthumb"><img src="${src}" alt=""></div>`).join("")}
+        <button class="gadd" data-addfoto="${t.id}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+          Agregar
+        </button>
+      </div>
+    </div>`;
+
+  if(t.note){body += `<div class="d-section"><div class="note">ℹ️ ${esc(t.note)}</div></div>`;}
+
+  return body;
+}
+
+function openDetail(id){
+  const t = temas.find(x=>x.id===id); if(!t) return;
+  state.openId=id;
+  $("#detailBody").innerHTML = detailHTML(t);
+  $("#detailBody").scrollTop=0;
+  $("#detail").classList.add("open");
+  $("#scrim").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+
+function closeDetail(){
+  state.openId=null;
+  $("#detail").classList.remove("open");
+  $("#scrim").classList.remove("open");
+  document.body.style.overflow="";
+}
+
+function refreshDetail(){ if(state.openId){ const t=temas.find(x=>x.id===state.openId); $("#detailBody").innerHTML=detailHTML(t);} }
+// #endregion
+
+
+// ==========================================
+// #region 7. EVENT LISTENERS & INITIALIZATION
+// ==========================================
+function render(){ renderHero(); renderList(); }
+
+document.addEventListener("click",(e)=>{
+  const openEl = e.target.closest("[data-open]");
+  if(openEl){ openDetail(openEl.getAttribute("data-open")); return; }
+  const joinEl = e.target.closest("[data-join]");
+  if(joinEl){ const id=joinEl.getAttribute("data-join"); state.joined[id]=!state.joined[id]; refreshDetail(); renderList(); return; }
+  const addEl = e.target.closest("[data-addfoto]");
+  if(addEl){ pickFoto(addEl.getAttribute("data-addfoto")); return; }
+});
+
+$("#closeDetail").addEventListener("click",closeDetail);
+$("#scrim").addEventListener("click",closeDetail);
+document.addEventListener("keydown",(e)=>{ if(e.key==="Escape" && state.openId) closeDetail(); });
+
+$("#segEstado").addEventListener("click",(e)=>{
+  const b=e.target.closest("button"); if(!b) return;
+  state.estado=b.getAttribute("data-v");
+  [...$("#segEstado").children].forEach(c=>c.classList.toggle("active",c===b));
+  renderList();
+});
+$("#fGestion").addEventListener("change",e=>{state.gestion=e.target.value;renderList();});
+$("#fPrioridad").addEventListener("change",e=>{state.prioridad=e.target.value;renderList();});
+$("#q").addEventListener("input",e=>{state.q=e.target.value;renderList();});
+
+function pickFoto(id){
+  const inp=document.createElement("input");
+  inp.type="file"; inp.accept="image/*";
+  inp.onchange=()=>{
+    const f=inp.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ (state.fotos[id]=state.fotos[id]||[]).push(r.result); refreshDetail(); };
+    r.readAsDataURL(f);
+  };
+  inp.click();
+}
+
+function entrar(){
+  const v=$("#pw").value.trim();
+  if(v===CLAVE){
+    $("#login").style.display="none";
+    $("#app").style.display="block";
+    render();
+  } else {
+    $("#loginErr").textContent="Clave incorrecta. Probá de nuevo.";
+    $("#pw").value=""; $("#pw").focus();
+  }
+}
+$("#loginBtn").addEventListener("click",entrar);
+$("#pw").addEventListener("keydown",e=>{ if(e.key==="Enter") entrar(); });
+$("#logoutBtn").addEventListener("click",()=>{
+  closeDetail();
+  $("#app").style.display="none";
+  $("#login").style.display="flex";
+  $("#pw").value=""; $("#loginErr").textContent=""; $("#pw").focus();
+});
+window.addEventListener("load",()=>$("#pw").focus());
+// #endregion
+</script>
+</body>
+</html>
