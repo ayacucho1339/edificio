@@ -180,22 +180,31 @@
   select:focus{border-color:var(--accent)}
   .selectwrap::after{content:"▾";position:absolute;right:11px;top:50%;transform:translateY(-50%);color:var(--ink-faint);font-size:11px;pointer-events:none}
 
-  /* ---------- ISSUE LIST ---------- */
+  /* ---------- ISSUE LIST / ACCORDION CONTAINERS ---------- */
   .group-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin:22px 2px 10px;display:flex;align-items:center;gap:8px}
   .group-label::after{content:"";flex:1;height:1px;background:var(--line)}
-  .list{display:flex;flex-direction:column;gap:10px}
-  .card{
+  .list{display:flex;flex-direction:column;gap:12px}
+  
+  .tema-item{
     background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-    padding:15px 16px;display:flex;align-items:center;gap:15px;cursor:pointer;
-    transition:border-color .14s, box-shadow .14s, transform .14s;box-shadow:var(--shadow);
+    box-shadow:var(--shadow);overflow:hidden;
+    transition:border-color .14s, box-shadow .14s;
   }
-  .card:hover{border-color:var(--line-strong);box-shadow:0 6px 20px rgba(16,24,40,.09);transform:translateY(-1px)}
-  .card .prio{width:4px;align-self:stretch;border-radius:99px;flex:none}
-  .card .body{flex:1;min-width:0}
+  .tema-item:hover{border-color:var(--line-strong);box-shadow:0 6px 20px rgba(16,24,40,.09)}
+  .tema-item.expanded{border-color:var(--line-strong);box-shadow:0 8px 24px rgba(16,24,40,.12)}
+
+  .card{
+    padding:15px 16px;display:flex;align-items:center;gap:15px;cursor:pointer;
+    position:relative;background:var(--surface);user-select:none;
+  }
+  .card .prio{width:4px;position:absolute;left:0;top:0;bottom:0;flex:none}
+  .card .body{flex:1;min-width:0;padding-left:4px}
   .card .title-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
   .card .title{font-family:"Space Grotesk";font-weight:600;font-size:15.5px;letter-spacing:-.01em}
   .card .meta{font-size:12.5px;color:var(--ink-soft);margin-top:5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-  .card .chev{color:var(--ink-faint);flex:none}
+  
+  .card .chev{color:var(--ink-faint);flex:none;transition:transform .2s ease}
+  .tema-item.expanded .card .chev{transform:rotate(90deg);color:var(--ink)}
 
   .pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
   .pill .d{width:6px;height:6px;border-radius:50%}
@@ -203,64 +212,33 @@
   .chip{font-size:11.5px;font-weight:500;color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);padding:2px 9px;border-radius:7px}
   .dotsep{color:var(--line-strong)}
 
-  /* ---------- DETAIL OVERLAY ---------- */
-  #scrim{position:fixed;inset:0;background:rgba(15,20,30,.42);backdrop-filter:blur(2px);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
-  #scrim.open{opacity:1;pointer-events:auto}
-  #detail{
-    position:fixed;top:0;right:0;bottom:0;z-index:50;width:min(820px,100%); /* Cambiado a 820px */
-    background:var(--surface);box-shadow:var(--shadow-lg);transform:translateX(102%);
-    transition:transform .26s cubic-bezier(.32,.72,.3,1);display:flex;flex-direction:column;
+  /* ---------- TOGGLE ACCORDION CONTENT ---------- */
+  .panel-toggle{
+    display:grid;grid-template-rows:0fr;
+    transition:grid-template-rows .24s cubic-bezier(0.3, 0.7, 0.3, 1);
+    background:var(--surface);
   }
-  #detail.open{transform:none}
-  .d-top{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2}
-.d-back{
-    display:inline-flex;align-items:center;gap:7px;border:none;
-    background:#FCEBE9; /* Fondo rojo sutil muy suave */
-    color:#E0483D;      /* El mismo rojo de prioridad alta */
-    font-size:14px;
-    font-weight:700;    /* Negrita fuerte */
-    padding:8px 16px;   /* Un poco más de aire para que parezca un botón real */
-    border-radius:8px;
-    transition:all .12s ease;
-  }
-  .d-back:hover{
-    background:#E0483D; /* Invierte los colores al pasar el mouse */
-    color:#FFFFFF;
-  }
-  .d-scroll{overflow-y:auto;padding:24px 26px 60px}
-  .d-eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600}
-  .d-title{font-family:"Space Grotesk";font-weight:600;font-size:26px;line-height:1.15;letter-spacing:-.015em;margin:8px 0 18px}
-  .d-props{display:grid;grid-template-columns:160px 1fr;gap:11px 16px;align-items:start;font-size:14px;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)} /* Ajustada la columna base de props */
+  .tema-item.expanded .panel-toggle{grid-template-rows:1fr}
+  .panel-inner{overflow:hidden}
+  
+  .d-scroll{padding:10px 20px 24px 20px;border-top:1px solid var(--line);background:var(--surface-2)}
+  .d-eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-bottom:4px}
+  .d-props{display:grid;grid-template-columns:160px 1fr;gap:11px 16px;align-items:start;font-size:14px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
   .d-props .pk{color:var(--ink-faint);font-size:12.5px;padding-top:2px}
   .d-props .pv{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-  .d-section{margin-top:26px}
-  .d-section h3{font-family:"Space Grotesk";font-size:13.5px;font-weight:600;letter-spacing:.01em;margin:0 0 12px;color:var(--ink)}
+  .d-section{margin-top:20px}
+  .d-section h3{font-family:"Space Grotesk";font-size:13.5px;font-weight:600;letter-spacing:.01em;margin:0 0 10px;color:var(--ink)}
   .d-body{font-size:14.5px;color:#2c333f;line-height:1.62}
-  .callout{background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:14px;color:#2c333f}
+  .callout{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:13px 15px;font-size:14px;color:#2c333f}
 
   /* cost panel */
   .cost{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
   .cost > div{background:var(--surface);padding:15px 16px}
   .cost .lbl{font-size:11.5px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
   .cost .val{font-family:"Space Grotesk";font-weight:700;font-size:23px;letter-spacing:-.01em;margin-top:6px}
-  .cost .val small{font-size:13px;font-weight:500;color:var(--ink-faint);letter-spacing:0}
-
-  /* participants */
-  .who{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
-  .who .p{font-size:12.5px;background:var(--accent-soft);color:var(--accent-ink);border:1px solid #d4ddff;padding:3px 10px;border-radius:8px;font-weight:500}
-  .join{border:1px dashed var(--line-strong);background:var(--surface);color:var(--accent-ink);font-weight:600;font-size:13px;padding:7px 14px;border-radius:9px;transition:all .12s}
-  .join:hover{border-color:var(--accent);background:var(--accent-soft)}
-  .join.in{background:var(--ink);color:#fff;border-style:solid;border-color:var(--ink)}
-
-  /* gallery */
-  .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
-  .gthumb{aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}
-  .gthumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .gadd{aspect-ratio:1;border:1px dashed var(--line-strong);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--ink-faint);font-size:11.5px;font-weight:500;background:var(--surface-2);transition:all .12s}
-  .gadd:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 
   /* incident table */
-  .tbl-wrap{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .tbl-wrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
   .tbl-scroll{overflow-x:auto}
   table.inc{border-collapse:collapse;width:100%;font-size:13px;min-width:520px}
   table.inc th{
@@ -274,12 +252,8 @@
   table.inc .eq{font-weight:600;white-space:nowrap}
   .tag-sm{display:inline-block;font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:6px}
 
-  .note{font-size:12px;color:var(--ink-faint);margin-top:10px;line-height:1.5}
-  .recur-flag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--accent-ink);background:var(--accent-soft);padding:2px 8px;border-radius:7px}
-
   .footer{padding:38px 0 30px;text-align:center;color:var(--ink-faint);font-size:12px}
 
-  /* Modificado el Media Query para no romper el panel ancho de 820px */
   @media (max-width:860px){
     .hero-grid{grid-template-columns:1fr}
     .sign{min-height:130px}
@@ -289,13 +263,11 @@
     .cost{grid-template-columns:1fr}
     .topbar-inner{height:56px}
     .brand .sub{display:none}
-    #detail{width:100%;}
   }
 </style>
 </head>
 <body>
 
-<!-- ===================== LOGIN ===================== -->
 <div id="login">
   <div class="login-card">
     <span class="login-badge"><span class="dot"></span>Acceso vecinos</span>
@@ -311,7 +283,6 @@
   </div>
 </div>
 
-<!-- ===================== APP ===================== -->
 <div id="app">
   <header class="topbar">
     <div class="wrap topbar-inner">
@@ -371,23 +342,11 @@
   </main>
 </div>
 
-<div id="scrim"></div>
-<aside id="detail">
-  <div class="d-top">
-    <button class="d-back" id="closeDetail">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
-      Volver
-    </button>
-  </div>
-  <div class="d-scroll" id="detailBody"></div>
-</aside>
-
 <script>
 // ==========================================
 // #region 1. GLOBAL CONFIG & CATALOGS
 // ==========================================
 const CLAVE = "edificio2026";
-const UNIDADES_TOTALES = 40; 
 
 const ESTADOS = {
   "sin iniciar": {label:"Sin iniciar", grupo:"abierto", color:"#8B93A1", soft:"#EEF0F4"},
@@ -431,7 +390,7 @@ const incidentesAscensores = [
   {fecha:"25/04/26", equipo:"Ascensores 2 y 3",  detalle:"El técnico dijo que funcionaban, sábado rotos.", reportadoPor:"Álvaro (3E)", estado:"cerrado"},
   {fecha:"22/05/26", equipo:"Ascensor 1",        detalle:"Se quedó encerrado Mario Caballero.", reportadoPor:"Álvaro  / Marina", estado:"cerrado"},
   {fecha:"26/05/26", equipo:"Ascensor 2",        detalle:"Sube y baja sin contemplar el piso elegido.", reportadoPor:"Adriana (1A)", estado:"cerrado"},
-  {fecha:"09/06/26", equipo:"Ascensor 2",        detalle:"Dejó de funcionar.", reportadoPor:"Álvaro (3E)", estado:"en curso"},
+  {fecha:"09/06/26", equipo:"Ascensor 2",        detalle:"Dejó de funcionar. Vinieron dos técnicos, esperando repuesto para arreglar.", reportadoPor:"Álvaro (3E)", estado:"en curso"},
 ];
 // #endregion
 
@@ -445,7 +404,7 @@ const temas = [
     titulo:"Ascensores",
     resumen:"Historial y seguimiento de las fallas recurrentes de los ascensores.",
     estado:"en curso", prioridad:"alta", gestionadoPor:["vecinos", "arquitecto"],
-    fechaComienzo: "2025-12-19",
+    fechaComienzo: "19/12/25",
     incidentes: incidentesAscensores,
     detalle:"Tema \"paraguas\" que agrupa todos los incidentes con los tres ascensores.",
   },
@@ -454,9 +413,9 @@ const temas = [
     titulo:"Expediente municipal #1 — Baja de impuesto",
     resumen:"Pedido de baja del impuesto municipal por montos demasiado altos.",
     estado:"en curso", prioridad:"alta", gestionadoPor:["vecinos"],
-    fechaComienzo: "2026-05-04",
+    fechaComienzo: "04/05/26",
     referente:"Mirta, Adriana (2A), Mario (8A)",
-    detalle:"Se gestiona ante la municipalidad la baja del impuesto...",
+    detalle:"Se gestiona ante la municipalidad la baja del impuesto.",
     callout:"Estado: aguardando respuesta de la municipalidad.",
   },
   {
@@ -464,7 +423,7 @@ const temas = [
     titulo:"Expediente municipal #2 — Corrección de registros",
     resumen:"Solicitud para corregir registros municipales del edificio.",
     estado:"en curso", prioridad:"alta", gestionadoPor:["fideicomiso"],
-    fechaComienzo: "2026-05-04",
+    fechaComienzo: "04/05/26",
     detalle:"Se solicita corregir registros municipales. Lo lleva adelante el fideicomiso.",
     callout:"No conocemos los detalles, ya que la gestión está a cargo del fideicomiso.",
   },
@@ -473,15 +432,16 @@ const temas = [
     titulo:"Arreglo de planos",
     resumen:"Los planos presentaban errores y se están rehaciendo.",
     estado:"en curso", prioridad:"alta", gestionadoPor:["fideicomiso"],
-    fechaComienzo: "2026-05-04",
+    fechaComienzo: "04/05/26",
     detalle:"Los planos del edificio presentaban errores. Se están volviendo a hacer.",
+    callout:"No conocemos los detalles, ya que la gestión está a cargo del fideicomiso.",
   },
   {
     id:"gotera-subsuelo",
     titulo:"Gotera en el subsuelo",
     resumen:"Filtración detectada en el subsuelo, sin responsable asignado.",
     estado:"sin iniciar", prioridad:"media", gestionadoPor:["a determinar"],
-    fechaComienzo: "2026-06-11",
+    fechaComienzo: "11/06/26",
     detalle:"Hay una gotera en el subsuelo. Falta definir quién se encarga.",
   },
   {
@@ -489,7 +449,7 @@ const temas = [
     titulo:"Acumulación de agua en el techo",
     resumen:"Se acumula agua en el techo; pendiente de definir responsable.",
     estado:"sin iniciar", prioridad:"media", gestionadoPor:["a determinar"],
-    fechaComienzo: "2026-06-11",
+    fechaComienzo: "11/06/26",
     detalle:"Se detecta acumulación de agua en el techo. Falta definir pasos a seguir.",
   },
   {
@@ -497,19 +457,18 @@ const temas = [
     titulo:"Bicicleteros",
     resumen:"Compra realizada y colocada. Gasto compartido entre quienes se sumaron. Resuelto por Álvaro (3E)",
     estado:"resuelto", prioridad:"baja", gestionadoPor:["vecinos"],
-    fechaComienzo: "2026-06-08",
+    fechaComienzo: "08/06/26",
     detalle:"Se compraron e instalaron bicicleteros para el edificio.",
     costo:96000,
   },
   {
     id:"cloro",
     titulo:"Compra de cloro para la pileta - Junio 2026",
-    resumen:"Tarea recurrente mensual para el mantenimiento de la pileta. Resuelto por Marina (6A)",
+    resumen:"Tarea recurrentemente mensual para el mantenimiento de la pileta. Resuelto por Marina (6A)",
     estado:"resuelto", prioridad:"baja", gestionadoPor:["vecinos"],
-    fechaComienzo: "Tarea recurrente",
-    fechaComienzo: "2026-06-01",
+    fechaComienzo: "01/06/26",
     detalle:"Compra periódica de cloro para el mantenimiento de la pileta",
-  },
+  }
 ];
 // #endregion
 
@@ -522,9 +481,7 @@ const state = {
   gestion:"todos", 
   prioridad:"todas", 
   q:"",
-  openId:null,
-  joined:{},     
-  fotos:{},      
+  openId:null
 };
 // #endregion
 
@@ -536,7 +493,14 @@ const $ = (s,el=document)=>el.querySelector(s);
 const esc = (s)=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const ars = (n)=>"$"+Number(n).toLocaleString("es-AR");
 
-function parseFecha(f){const[d,m,y]=f.split("/").map(Number);return new Date(2000+y,m-1,d);}
+function parseFecha(f){
+  if(f.includes("-")){
+    const[y,m,d]=f.split("-").map(Number);
+    return new Date(y,m-1,d);
+  }
+  const[d,m,y]=f.split("/").map(Number);
+  return new Date(2000+y,m-1,d);
+}
 
 function diasSinIncidentes(inc){
   if(inc.some(i=>i.estado!=="cerrado")) return 0; 
@@ -590,14 +554,13 @@ function renderHero(){
   const pctResuelto = Math.round(resueltos/total*100);
 
   $("#hero").innerHTML = `
-    <div class="sign" data-open="ascensores">
+    <div class="sign" data-hero-click="ascensores">
       <div class="stripe"></div>
       <div class="sign-top">
         <span class="pulse ${activo?'on':''}" style="background:${activo ? '#ff6b5e' : colorSinFallas}"></span>
         Ascensores · seguridad y estado
       </div>
       
-      <!-- Corregido el contenedor para ordenar los números de las métricas en una sola línea fija -->
       <div style="display: flex; gap: 20px; margin: 18px 0 6px; flex-wrap: nowrap; justify-content: space-between; width: 100%;">
         <div style="flex: 1; min-width: 0;">
           <div class="sign-num" style="color:${colorSinFallas}">${diasSinFallas}</div>
@@ -614,7 +577,7 @@ function renderHero(){
       </div>
 
       <div class="sign-foot" style="margin-top: 10px;">
-        ${asc.incidentes.length} incidentes registrados desde el 2025-12-19 ${activo?' ·<strong><span style="color:#ffb3aa">Falla activa detectada</span></strong>':''}
+        - ${asc.incidentes.length} incidentes registrados desde el 19/12/25 ${activo?' <strong><span style="color:#ffb3aa">- Falla activa detectada</span></strong>':''}
       </div>
     </div>
     
@@ -658,29 +621,37 @@ function temasFiltrados(){
 function cardHTML(t){
   const gest = t.gestionadoPor.map(g=>`<span class="chip">${GESTION[g].label}</span>`).join("");
   let extra = "";
-  if(t.tipo==="ascensores"){const d=diasSinIncidentes(t.incidentes);extra=`<span class="dotsep">·</span><span>${t.incidentes.length} incidentes · ${d} ${d===1?'día':'días'} sin fallas</span>`;}
-  else if(t.costo && (t.participantes||[]).length){extra=`<span class="dotsep">·</span><span>${ars(t.costo)}</span>`;}
-  else if(t.recurrente){extra=`<span class="dotsep">·</span><span class="recur-flag">↻ ${t.recurrente}</span>`;}
+  if(t.tipo==="ascensores"){const d=diasSinIncidentes(t.incidentes);extra=`<span class="dotsep">·</span><span>${t.incidentes.length} inc. · ${d} ${d===1?'día':'días'} sin fallas</span>`;}
+  else if(t.costo){extra=`<span class="dotsep">·</span><span>${ars(t.costo)}</span>`;}
+  
+  const fechaBadge = t.fechaComienzo ? `<span class="chip mono" style="background:var(--paper)">📅 ${esc(t.fechaComienzo)}</span>` : '';
+
   return `
-    <div class="card" data-open="${t.id}">
-      <span class="prio" style="background:${PRIORIDADES[t.prioridad].color}"></span>
-      <div class="body">
-        <div class="title-row">
-          <span class="title">${esc(t.titulo)}</span>
-          ${pillEstado(t.estado)}
+    <div class="tema-item" id="item-${t.id}">
+      <div class="card" data-toggle="${t.id}">
+        <span class="prio" style="background:${PRIORIDADES[t.prioridad].color}"></span>
+        <div class="body">
+          <div class="title-row">
+            <span class="title">${esc(t.titulo)}</span>
+            ${pillEstado(t.estado)}
+          </div>
+          <div class="meta">
+            Prioridad: ${prioTag(t.prioridad)}<span class="dotsep">·</span>Gestionado por: ${gest} - Comienzo: ${fechaBadge}${extra}
+          </div>
         </div>
-        <div class="meta">
-          ${prioTag(t.prioridad)}<span class="dotsep">·</span>${gest}${extra}
-        </div>
+        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
       </div>
-      <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      <div class="panel-toggle">
+        <div class="panel-inner" id="inner-${t.id}">
+          </div>
+      </div>
     </div>`;
 }
 
 function renderList(){
   const arr = temasFiltrados();
   const cont = $("#list");
-  if(!arr.length){cont.innerHTML=`<div class="card" style="cursor:default;justify-content:center;color:var(--ink-faint)">No hay temas que coincidan con el filtro.</div>`;
+  if(!arr.length){cont.innerHTML=`<div class="tema-item" style="cursor:default;padding:20px;text-align:center;color:var(--ink-faint)">No hay temas que coincidan con el filtro.</div>`;
     $("#listHint").textContent="";return;}
 
   if(state.estado==="todos"){
@@ -690,7 +661,7 @@ function renderList(){
     if(cerrados.length) html+=`<div class="group-label">Cerrados · ${cerrados.length}</div><div class="list">${cerrados.map(cardHTML).join("")}</div>`;
     cont.innerHTML=html;
   } else {
-    cont.innerHTML = arr.map(cardHTML).join("");
+    cont.innerHTML = `<div class="list">${arr.map(cardHTML).join("")}</div>`;
   }
   $("#listHint").textContent = state.estado==="abiertos"
     ? `${arr.length} ${arr.length===1?'tema abierto':'temas abiertos'}, ordenados por prioridad`
@@ -700,7 +671,7 @@ function renderList(){
 
 
 // ==========================================
-// #region 6. DETAIL OVERLAY GENERATION
+// #region 6. DETAIL GENERATION WITHIN ACCORDION
 // ==========================================
 function detailHTML(t){
   const gest = t.gestionadoPor.map(g=>`<span class="chip">${GESTION[g].label}</span>`).join("");
@@ -713,12 +684,11 @@ function detailHTML(t){
     props.push([`Fecha de Comienzo`, `<span class="mono">${esc(t.fechaComienzo)}</span>`]);
   }
   if(t.referente) props.push([`Referente`, `<span>${esc(t.referente)}</span>`]);
-  if(t.recurrente) props.push([`Recurrencia`, `<span class="recur-flag">↻ ${esc(t.recurrente)}</span>`]);
 
   let body = `
-    <div class="d-eyebrow">${t.tipo==="ascensores"?"Tema de seguridad":"Tema del edificio"}</div>
-    <h1 class="d-title">${esc(t.titulo)}</h1>
-    <div class="d-props">${props.map(([k,v])=>`<div class="pk">${k}</div><div class="pv">${v}</div>`).join("")}</div>`;
+    <div class="d-scroll">
+      <div class="d-eyebrow">${t.tipo==="ascensores"?"Tema de seguridad":"Tema del edificio"}</div>
+      <div class="d-props">${props.map(([k,v])=>`<div class="pk">${k}</div><div class="pv">${v}</div>`).join("")}</div>`;
 
   if(t.detalle){
     body += `<div class="d-section"><h3>Descripción</h3><div class="d-body">${esc(t.detalle)}</div></div>`;
@@ -727,7 +697,7 @@ function detailHTML(t){
     body += `<div class="d-section"><div class="callout">${esc(t.callout)}</div></div>`;
   }
 
-  if(t.costo && (t.participantes||[]).length){
+  if(t.costo){
     body += `
       <div class="d-section">
         <h3>Costo</h3>
@@ -761,42 +731,36 @@ function detailHTML(t){
       </div>`;
   }
 
-  const fotos = state.fotos[t.id]||[];
-  body += `
-    <div class="d-section">
-      <h3>Fotos y archivos</h3>
-      <div class="gallery">
-        ${fotos.map(src=>`<div class="gthumb"><img src="${src}" alt=""></div>`).join("")}
-        <button class="gadd" data-addfoto="${t.id}">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
-          Agregar
-        </button>
-      </div>
-    </div>`;
-
-  if(t.note){body += `<div class="d-section"><div class="note">ℹ️ ${esc(t.note)}</div></div>`;}
-
+  body += `</div>`;
   return body;
 }
 
-function openDetail(id){
-  const t = temas.find(x=>x.id===id); if(!t) return;
-  state.openId=id;
-  $("#detailBody").innerHTML = detailHTML(t);
-  $("#detailBody").scrollTop=0;
-  $("#detail").classList.add("open");
-  $("#scrim").classList.add("open");
-  document.body.style.overflow="hidden";
-}
+function toggleTema(id){
+  const el = document.getElementById(`item-${id}`);
+  const inner = document.getElementById(`inner-${id}`);
+  if(!el || !inner) return;
 
-function closeDetail(){
-  state.openId=null;
-  $("#detail").classList.remove("open");
-  $("#scrim").classList.remove("open");
-  document.body.style.overflow="";
+  if(el.classList.contains("expanded")){
+    el.classList.remove("expanded");
+    if(state.openId === id) state.openId = null;
+  } else {
+    if(state.openId){
+      const prevEl = document.getElementById(`item-${state.openId}`);
+      if(prevEl) prevEl.classList.remove("expanded");
+    }
+    
+    const t = temas.find(x=>x.id===id);
+    if(t){
+      inner.innerHTML = detailHTML(t);
+      el.classList.add("expanded");
+      state.openId = id;
+      
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 160);
+    }
+  }
 }
-
-function refreshDetail(){ if(state.openId){ const t=temas.find(x=>x.id===state.openId); $("#detailBody").innerHTML=detailHTML(t);} }
 // #endregion
 
 
@@ -806,39 +770,24 @@ function refreshDetail(){ if(state.openId){ const t=temas.find(x=>x.id===state.o
 function render(){ renderHero(); renderList(); }
 
 document.addEventListener("click",(e)=>{
-  const openEl = e.target.closest("[data-open]");
-  if(openEl){ openDetail(openEl.getAttribute("data-open")); return; }
-  const joinEl = e.target.closest("[data-join]");
-  if(joinEl){ const id=joinEl.getAttribute("data-join"); state.joined[id]=!state.joined[id]; refreshDetail(); renderList(); return; }
-  const addEl = e.target.closest("[data-addfoto]");
-  if(addEl){ pickFoto(addEl.getAttribute("data-addfoto")); return; }
+  const toggleEl = e.target.closest("[data-toggle]");
+  if(toggleEl){ toggleTema(toggleEl.getAttribute("data-toggle")); return; }
+  
+  const heroClickEl = e.target.closest("[data-hero-click]");
+  if(heroClickEl){ toggleTema(heroClickEl.getAttribute("data-hero-click")); return; }
 });
-
-$("#closeDetail").addEventListener("click",closeDetail);
-$("#scrim").addEventListener("click",closeDetail);
-document.addEventListener("keydown",(e)=>{ if(e.key==="Escape" && state.openId) closeDetail(); });
 
 $("#segEstado").addEventListener("click",(e)=>{
   const b=e.target.closest("button"); if(!b) return;
   state.estado=b.getAttribute("data-v");
+  state.openId = null;
   [...$("#segEstado").children].forEach(c=>c.classList.toggle("active",c===b));
   renderList();
 });
-$("#fGestion").addEventListener("change",e=>{state.gestion=e.target.value;renderList();});
-$("#fPrioridad").addEventListener("change",e=>{state.prioridad=e.target.value;renderList();});
-$("#q").addEventListener("input",e=>{state.q=e.target.value;renderList();});
 
-function pickFoto(id){
-  const inp=document.createElement("input");
-  inp.type="file"; inp.accept="image/*";
-  inp.onchange=()=>{
-    const f=inp.files[0]; if(!f) return;
-    const r=new FileReader();
-    r.onload=()=>{ (state.fotos[id]=state.fotos[id]||[]).push(r.result); refreshDetail(); };
-    r.readAsDataURL(f);
-  };
-  inp.click();
-}
+$("#fGestion").addEventListener("change",e=>{state.gestion=e.target.value; state.openId = null; renderList();});
+$("#fPrioridad").addEventListener("change",e=>{state.prioridad=e.target.value; state.openId = null; renderList();});
+$("#q").addEventListener("input",e=>{state.q=e.target.value; state.openId = null; renderList();});
 
 function entrar(){
   const v=$("#pw").value.trim();
@@ -851,10 +800,11 @@ function entrar(){
     $("#pw").value=""; $("#pw").focus();
   }
 }
-$("#loginBtn").addEventListener("click",entrar);
+
+$("#loginBtn").addEventListener("click", entrar);
 $("#pw").addEventListener("keydown",e=>{ if(e.key==="Enter") entrar(); });
 $("#logoutBtn").addEventListener("click",()=>{
-  closeDetail();
+  state.openId = null;
   $("#app").style.display="none";
   $("#login").style.display="flex";
   $("#pw").value=""; $("#loginErr").textContent=""; $("#pw").focus();
