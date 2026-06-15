@@ -213,8 +213,20 @@
   }
   #detail.open{transform:none}
   .d-top{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--surface);z-index:2}
-  .d-back{display:inline-flex;align-items:center;gap:7px;border:none;background:none;color:var(--ink-soft);font-size:13.5px;font-weight:500;padding:6px 8px;border-radius:8px}
-  .d-back:hover{background:var(--surface-2);color:var(--ink)}
+.d-back{
+    display:inline-flex;align-items:center;gap:7px;border:none;
+    background:#FCEBE9; /* Fondo rojo sutil muy suave */
+    color:#E0483D;      /* El mismo rojo de prioridad alta */
+    font-size:14px;
+    font-weight:700;    /* Negrita fuerte */
+    padding:8px 16px;   /* Un poco más de aire para que parezca un botón real */
+    border-radius:8px;
+    transition:all .12s ease;
+  }
+  .d-back:hover{
+    background:#E0483D; /* Invierte los colores al pasar el mouse */
+    color:#FFFFFF;
+  }
   .d-scroll{overflow-y:auto;padding:24px 26px 60px}
   .d-eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600}
   .d-title{font-family:"Space Grotesk";font-weight:600;font-size:26px;line-height:1.15;letter-spacing:-.015em;margin:8px 0 18px}
@@ -363,7 +375,7 @@
 <aside id="detail">
   <div class="d-top">
     <button class="d-back" id="closeDetail">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m15 18-6-6 6-6"/></svg>
       Volver
     </button>
   </div>
